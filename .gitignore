@@ -1,0 +1,14 @@
+﻿*.gitignore
+*.dll.config
+*.config
+*.csproj
+*.csproj.DotSettings
+*.sln
+*.sln.DotSettings
+
+.git/
+.idea/
+bin/
+obj/
+packages/
+Properties/
