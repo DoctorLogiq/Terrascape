@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics;
 using Terrascape.Debugging;
@@ -17,6 +18,8 @@ namespace Terrascape
 		protected readonly TerrascapeWindow window = new TerrascapeWindow(1280, 720, new GraphicsMode(32, 24, 8, SAMPLES), "Terrascape", GameWindowFlags.Default, DisplayDevice.Default, 4, 0, GraphicsContextFlags.ForwardCompatible);
 		private bool has_shut_down = false;
 		private bool is_self_shutting_down = false;
+		public bool HasCrashed { get; private set; } = false;
+		private string phase = "NONE";
 
 		internal static void Main(string[] p_arguments)
 		{
@@ -128,26 +131,82 @@ namespace Terrascape
 			#region Window Setup
 			instance.window.Load += (p_sender, p_args) =>
 			{
-				instance.Initialize();
-				instance.Load();
+				if (!instance.HasCrashed)
+				{
+					try
+					{
+						instance.phase = "INITIALIZATION";
+						instance.Initialize();
+						instance.phase = "LOADING";
+						instance.Load();
+						instance.phase = "POST-LOAD";
+					}
+					catch (Exception exception)
+					{
+						HandleCrash(exception);
+					}
+				}
 			};
 			instance.window.UpdateFrame += (p_sender, p_args) =>
 			{
-				instance.Update(p_args.Time);
+				if (!instance.HasCrashed)
+				{
+					try
+					{
+						instance.phase = "UPDATE";
+						instance.Update(p_args.Time);
+					}
+					catch (Exception exception)
+					{
+						HandleCrash(exception);
+					}
+				}
 			};
 			instance.window.RenderFrame += (p_sender, p_args) =>
 			{
-				instance.Render(p_args.Time);
+				if (!instance.HasCrashed)
+				{
+					try
+					{
+						instance.phase = "RENDER";
+						instance.Render(p_args.Time);
+					}
+					catch (Exception exception)
+					{
+						HandleCrash(exception);
+					}
+				}
 			};
 			instance.window.Resize += (p_sender, p_args) =>
 			{
-				instance.Resize();
+				if (!instance.HasCrashed)
+				{
+					try
+					{
+						instance.phase = "RESIZE";
+						instance.Resize();
+						instance.phase = "RENDER-WHILE-RESIZING";
+						instance.Render(double.Epsilon);
+					}
+					catch (Exception exception)
+					{
+						HandleCrash(exception);
+					}
+				}
 			};
 			instance.window.Unload += (p_sender, p_args) =>
 			{
 				if (instance.has_shut_down) return;
-				instance.Shutdown();
-				instance.has_shut_down = true;
+				try
+				{
+					instance.phase = "SHUTDOWN";
+					instance.Shutdown();
+					instance.has_shut_down = true;
+				}
+				catch (Exception exception)
+				{
+					HandleCrash(exception);
+				}
 			};
 			instance.window.Closing += (p_sender, p_args) =>
 			{
@@ -155,12 +214,21 @@ namespace Terrascape
 				
 				if (!instance.is_self_shutting_down)
 				{
-					bool cancel = false;
-					instance.RequestShutdown(ref cancel);
-					if (!cancel)
+					try
 					{
-						instance.Shutdown();
-						instance.has_shut_down = true;
+						instance.phase = "SHUTDOWN-REQUEST";
+						bool cancel = false;
+						instance.RequestShutdown(ref cancel);
+						if (!cancel)
+						{
+							instance.phase = "SHUTDOWN";
+							instance.Shutdown();
+							instance.has_shut_down = true;
+						}
+					}
+					catch (Exception exception)
+					{
+						HandleCrash(exception);
 					}
 				}
 			};
@@ -169,6 +237,62 @@ namespace Terrascape
 
 			// Reset the console back to its previous state as it was before the game started, and hold it open if needed
 			ConsoleHelper.Terminate();
+		}
+
+		private static void HandleCrash(Exception p_exception)
+		{
+			Debug.LogCritical($"CRASHED! (During phase: '{instance.phase}')");
+			instance.HasCrashed = true;
+			instance.is_self_shutting_down = true;
+			if (instance.window != null)
+            {
+            	instance.window.Close();
+            	instance.window.ProcessEvents();
+            }
+
+            Debug.NewLine();
+
+            Exception? exception = p_exception;
+            bool first = true;
+            while (exception != null)
+            {
+	            if (first)
+	            {
+		            bool has_message = !string.IsNullOrEmpty(exception.Message);
+		            Debug.LogCritical($"{StringHelper.AorAn(exception.GetType().Name, p_capital: true)} was caught{(has_message ? " with the message:" : ";")}");
+		            if (has_message)
+		            {
+			            Debug.LogCritical($"\"{exception.Message}\"");
+		            }
+	            }
+	            else
+	            {
+		            bool has_message = !string.IsNullOrEmpty(exception.Message);
+		            Debug.LogCritical($"Caused by {StringHelper.AorAn(exception.GetType().Name)}{(has_message ? " with the message:" : ";")}");
+		            if (has_message)
+		            {
+			            Debug.LogCritical($"\"{exception.Message}\"");
+		            }
+	            }
+
+	            if (!string.IsNullOrEmpty(exception.StackTrace))
+	            {
+		            foreach (string trace in exception.StackTrace.Split('\n'))
+		            {
+			            string print = trace;
+
+			            if (print.Contains(" at ")) print = print.Replace(" at ", "");
+			            if (print.Contains("\\")) print = print.Substring(print.LastIndexOf('\\') + 1);
+			            
+			            Debug.LogCritical($"  at: {print.Trim()}");
+		            }
+	            }
+	            
+	            if (first) first = false;
+	            exception = exception.InnerException;
+            }
+            
+            Debug.NewLine();
 		}
 
 		protected abstract void Initialize();

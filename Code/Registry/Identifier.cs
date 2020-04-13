@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using Terrascape.Debugging;
 
 #nullable enable
 
 namespace Terrascape.Registry
 {
-	public sealed class Identifier : IEquatable<Identifier>, IEquatable<string>
+	public sealed class Identifier : IEquatable<string>
 	{
 		private static readonly Regex identifier_regex = new Regex(@"^[a-z]{1}[a-z0-9_]{4,}$", RegexOptions.Compiled);
 		private readonly string name;
@@ -18,7 +19,7 @@ namespace Terrascape.Registry
 			
 			this.name = p_name;
 		}
-		
+
 		public override string ToString()
 		{
 			return this.name;
@@ -43,18 +44,18 @@ namespace Terrascape.Registry
 			return hash;
 		}
 		
-		[SuppressMessage("ReSharper", "BaseObjectEqualsIsObjectEquals")]
+		[SuppressMessage("ReSharper", "ConvertIfStatementToSwitchStatement")]
 		public override bool Equals(object p_other)
 		{
-			if (p_other is Identifier other) return Equals(other);
-			return base.Equals(p_other);
+			if (p_other is Identifier identifier)
+				return this == identifier;
+			
+			if (p_other is string str)
+				return this == str;
+			
+			return false;
 		}
 		
-		public bool Equals(Identifier p_other)
-		{
-			return p_other != null && this.name == p_other.name;
-		}
-
 		public bool Equals(string p_other)
 		{
 			return this.name == p_other;
@@ -62,12 +63,22 @@ namespace Terrascape.Registry
 
 		public static bool operator ==(Identifier p_id1, Identifier p_id2)
 		{
-			return p_id2 != null && (p_id1 != null && p_id1.name == p_id2.name);
+			if (ReferenceEquals(p_id1, p_id2))
+			{
+				return true;
+			}
+
+			if (ReferenceEquals(p_id1, null) || ReferenceEquals(p_id2, null))
+			{
+				return false;
+			}
+
+			return p_id1.name == p_id2.name;
 		}
 
 		public static bool operator !=(Identifier p_id1, Identifier p_id2)
 		{
-			return p_id2 != null && (p_id1 != null && p_id1.name != p_id2.name);
+			return !(p_id1 == p_id2);
 		}
 		
 		#endregion

@@ -26,6 +26,8 @@ namespace Terrascape.Debugging
 			}
 		}
 		
+		private static string EmptyTimestamp => "             ";
+
 		#region Indentation
 
 		private static string Indentation { get; set; } = string.Empty;
@@ -88,6 +90,12 @@ namespace Terrascape.Debugging
 				else if (p_after_indentation == IndentationStyle.Unindent) Unindent();
 				else if (p_after_indentation == IndentationStyle.Reset) ResetIndentation();
 			}
+		}
+
+		internal static void NewLine()
+		{
+			string message = $"{DebugChannel.None.Tag()} {EmptyTimestamp} >";
+			Console.WriteLine(message, DebugChannel.Debug.Colour());
 		}
 
 		internal static void LogDebug(string p_message, DebuggingLevel p_min_level = DebuggingLevel.Basic, IndentationStyle p_before_indentation = IndentationStyle.None, IndentationStyle p_after_indentation = IndentationStyle.None)
@@ -161,7 +169,8 @@ namespace Terrascape.Debugging
 		Program,
 		Warning,
 		Error,
-		Critical
+		Critical,
+		None
 	}
 
 	internal enum DebuggingLevel : uint
@@ -183,6 +192,7 @@ namespace Terrascape.Debugging
 				DebugChannel.Warning  => "¦  WARNING ¦",
 				DebugChannel.Error    => "¦    ERROR ¦",
 				DebugChannel.Critical => "¦ CRITICAL ¦",
+				DebugChannel.None	  => "¦          ¦",
 				_                     => throw new ArgumentOutOfRangeException(nameof(p_channel), p_channel, null)
 			};
 		}

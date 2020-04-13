@@ -23,11 +23,17 @@ namespace Terrascape.Registry
 		#region IsRegistered
 		protected bool ActualIsRegistered(in Identifier p_identifier)
 		{
+			if (p_identifier == null || string.IsNullOrEmpty(p_identifier.ToString()))
+				return false;
+			
 			return this.registry.ContainsKey(p_identifier);
 		}
 		
 		protected bool ActualIsRegistered(in T p_object)
 		{
+			if (p_object == null || string.IsNullOrEmpty(p_object.name))
+				return false;
+			
 			return this.registry.ContainsKey(p_object.name);
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Terrascape.Debugging;
 using Terrascape.Helpers;
 using Terrascape.Registry;
@@ -7,17 +8,18 @@ using Terrascape.Registry;
 
 namespace Terrascape.Rendering
 {
+	[SuppressMessage("ReSharper", "InconsistentNaming")]
 	public abstract class GraphicsObject : IIdentifiable
 	{
 		private static readonly List<GraphicsObject> registry = new List<GraphicsObject>();
+		
 		public Identifier name { get; }
-		// ReSharper disable once InconsistentNaming
-		protected int? ID;
+		public readonly int ID;
 
-		protected GraphicsObject(Identifier p_name, int? p_id = null)
+		protected GraphicsObject(Identifier p_name, int p_id = 0)
 		{
 			this.name = p_name;
-			this.ID = p_id;
+			this.ID   = p_id;
 			registry.Add(this);
 		}
 
@@ -28,7 +30,7 @@ namespace Terrascape.Rendering
 			Debug.LogDebugProcessStart("Cleaning up OpenGL objects", DebuggingLevel.Verbose);
 			foreach (GraphicsObject obj in registry)
 			{
-				Debug.LogDebug($"{SpecialCharacters.Bullet} {obj.GetType().Name} '{obj.name}' {(obj.ID != null ? $"({obj.ID})" : "")}",
+				Debug.LogDebug($"{SpecialCharacters.Bullet} {obj.GetType().Name} '{obj.name}' {($"({obj.ID})")}",
 					DebuggingLevel.Verbose, p_after_indentation: IndentationStyle.Indent);
 				
 				obj.Delete();
