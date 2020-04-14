@@ -124,29 +124,32 @@ namespace Terrascape.Rendering
 
         internal static void Cleanup()
         {
-            Debug.LogDebugProcessStart("Cleaning up VAOs, VBOs and EBOs", DebuggingLevel.Verbose);
-            foreach ((int id, bool is_test) in VBOs)
+            Debug.DoIfAssertionPasses(() => VBOs.Count > 0 || EBOs.Count > 0 || VAOs.Count > 0, () =>
             {
-                if (!is_test) Debug.LogDebug($"Deleting VBO ({id})", DebuggingLevel.Verbose);
-                else Debug.LogTest($"Deleting test VBO ({id})", DebuggingLevel.Verbose);
+                Debug.LogDebugProcessStart("Cleaning up VAOs, VBOs and EBOs", DebuggingLevel.Verbose);
+                foreach ((int id, bool is_test) in VBOs)
+                {
+                    if (!is_test) Debug.LogDebug($"Deleting VBO ({id})", DebuggingLevel.Verbose);
+                    else Debug.LogTest($"Deleting test VBO ({id})", DebuggingLevel.Verbose);
 
-                GL.DeleteBuffer(id);
-            }
-            foreach ((int id, bool is_test) in EBOs)
-            {
-                if (!is_test) Debug.LogDebug($"Deleting EBO ({id})", DebuggingLevel.Verbose);
-                else Debug.LogTest($"Deleting test EBO ({id})", DebuggingLevel.Verbose);
+                    GL.DeleteBuffer(id);
+                }
+                foreach ((int id, bool is_test) in EBOs)
+                {
+                    if (!is_test) Debug.LogDebug($"Deleting EBO ({id})", DebuggingLevel.Verbose);
+                    else Debug.LogTest($"Deleting test EBO ({id})", DebuggingLevel.Verbose);
 
-                GL.DeleteBuffer(id);
-            }
-            foreach ((int id, bool is_test) in VAOs)
-            {
-                if (!is_test) Debug.LogDebug($"Deleting VAO ({id})", DebuggingLevel.Verbose);
-                else Debug.LogTest($"Deleting test VAO ({id})", DebuggingLevel.Verbose);
+                    GL.DeleteBuffer(id);
+                }
+                foreach ((int id, bool is_test) in VAOs)
+                {
+                    if (!is_test) Debug.LogDebug($"Deleting VAO ({id})", DebuggingLevel.Verbose);
+                    else Debug.LogTest($"Deleting test VAO ({id})", DebuggingLevel.Verbose);
 
-                GL.DeleteVertexArray(id);
-            }
-            Debug.LogDebugProcessEnd(true, DebuggingLevel.Verbose);
+                    GL.DeleteVertexArray(id);
+                }
+                Debug.LogDebugProcessEnd(true, DebuggingLevel.Verbose);
+            });
         }
 	}
 }

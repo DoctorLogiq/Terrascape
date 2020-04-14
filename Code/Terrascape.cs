@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using Terrascape.Debugging;
-using Terrascape.Helpers;
 using Terrascape.Registry;
 using Terrascape.Rendering;
+using Terrascape.Rendering.Interface;
 
 #nullable enable
 
@@ -14,7 +14,7 @@ namespace Terrascape
 	internal class Terrascape : Program
 	{
 		private Matrix4 view_matrix, projection_matrix;
-		private UiModel? test_model;
+		private GUI? current_gui = null;
 		
 		protected override void Initialize()
 		{
@@ -39,11 +39,13 @@ namespace Terrascape
 			this.projection_matrix = Matrix4.CreateOrthographic(this.window.Width, this.window.Height, .01f, 100f); // TODO(LOGIX): Update values
 
 			PreLoad();
+			
+			ChangeGUI<GUILoadingScreen>();
 		}
 
-		[SuppressMessage("ReSharper", "UnusedVariable")] // TODO(LOGIX): Remove when implemented
 		private static void CheckForUpdates()
 		{
+			/* TODO(LOGIX): Implement
 			Debug.LogInfo("Checking for updates");
 			string? latest = GitHelper.ReadResource("https://raw.githubusercontent.com/DoctorLogiq/Terrascape/master/Resources/LATEST.json", true);
 			if (string.IsNullOrEmpty(latest))
@@ -54,14 +56,15 @@ namespace Terrascape
 			{
 				foreach ((string key, object value) in JsonHelper.ParseJsonBasic(latest))
 				{
-					// TODO(LOGIX): Implement
+					
 				}
 			}
+			*/
 		}
 
-		[SuppressMessage("ReSharper", "UnusedVariable")] // TODO(LOGIX): Remove when implemented
 		private static void CheckForChanges()
 		{
+			/* TODO(LOGIX): Implement
 			Debug.LogInfo("Fetching changelog");
 			string? changelog = GitHelper.ReadResource("https://raw.githubusercontent.com/DoctorLogiq/Terrascape/master/Resources/CHANGES.json", true);
 			if (string.IsNullOrEmpty(changelog))
@@ -72,39 +75,30 @@ namespace Terrascape
 			{
 				foreach (string str in Array.ConvertAll((object[])JsonHelper.ParseJsonBasic(changelog)[0].Item2, (p_input => p_input?.ToString() ?? string.Empty)))
 				{
-					// TODO(LOGIX): Implement
+					
 				}
 			}
+			*/
 		}
 
-		private void PreLoad()
+		private static void PreLoad()
 		{
 			Shader.Load(RegistryKeys.Shaders.InterfaceShader, "ui_shader");
 			SetUiShaderChannelMix(); // NOTE(LOGIX): This is necessary to set the default channel mix to full white + alpha
             
 			Texture.Load(RegistryKeys.Textures.FullMask, "GUI/full_mask");
 			Texture.Load(RegistryKeys.Textures.Loading, "GUI/loading");
-            
-			float[] vertices =
-			{
-				-0.5f, +0.5f, +0.0f, 0f, 0f,
-				+0.5f, +0.5f, +0.0f, 1f, 0f,
-				+0.5f, -0.5f, +0.0f, 1f, 1f,
-				-0.5f, -0.5f, +0.0f, 0f, 1f
-			};
-
-			uint[] indices =
-			{
-				0,1,3,
-				1,2,3
-			};
-
-			this.test_model = new UiModel("test_model", TextureRegistry.Get(RegistryKeys.Textures.Loading), null, vertices, indices); 
 		}
 		
 		protected override void Load()
 		{
-			
+			 
+		}
+
+		internal void ChangeGUI<T>() where T : GUI, new()
+		{
+			this.current_gui?.Dispose();
+			this.current_gui = new T();
 		}
 
 		protected override void Update(in double p_delta)
@@ -121,7 +115,7 @@ namespace Terrascape
 				ShaderRegistry.Get(RegistryKeys.Shaders.InterfaceShader).Use();
 				Shader.CurrentShader?.SetMatrix4("inView", this.view_matrix);
 				Shader.CurrentShader?.SetMatrix4("inProjection", this.projection_matrix);
-				this.test_model.Render(p_delta);
+				this.current_gui?.Render(p_delta);
 			}
 			GL.Enable(EnableCap.DepthTest);
 
@@ -146,6 +140,8 @@ namespace Terrascape
 			Debug.ResetIndentation();
 			Debug.LogDebug("Shutting down", p_after_indentation: IndentationStyle.Indent);
 			
+			this.current_gui?.Dispose();
+			
 			foreach (TextureUnit unit in Enum.GetValues(typeof(TextureUnit)))
 			{
 				GL.ActiveTexture(unit);
@@ -157,7 +153,7 @@ namespace Terrascape
 			GL.DisableVertexAttribArray(0);
 			GL.DisableVertexAttribArray(1);
 			GL.UseProgram(0);
-
+			
 			Renderer.Cleanup();
 			GraphicsObject.Cleanup();
 			Debug.LogDebug("Shutdown complete", p_before_indentation: IndentationStyle.Unindent);

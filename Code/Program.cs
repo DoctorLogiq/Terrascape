@@ -21,6 +21,11 @@ namespace Terrascape
 		public bool HasCrashed { get; private set; } = false;
 		private string phase = "NONE";
 
+		public static double Width { get; private set; } = 0;
+		public static double Height { get; private set; } = 0;
+		public static double HalfWidth { get; private set; } = 0;
+		public static double HalfHeight { get; private set; } = 0;
+
 		internal static void Main(string[] p_arguments)
 		{
 			instance = new Terrascape();
@@ -185,6 +190,10 @@ namespace Terrascape
 					{
 						instance.phase = "RESIZE";
 						instance.Resize();
+						Width = (double)instance.window.Width;
+						Height = (double)instance.window.Height;
+						HalfWidth = Width / 2D;
+						HalfHeight = Height / 2D;
 						instance.phase = "RENDER-WHILE-RESIZING";
 						instance.Render(double.Epsilon);
 					}

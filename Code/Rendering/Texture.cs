@@ -15,14 +15,16 @@ namespace Terrascape.Rendering
 {
 	public class Texture : GraphicsObject
 	{
-		public readonly double width;
-		public readonly double height;
+		public readonly double width, half_width;
+		public readonly double height, half_height;
 		
 		private Texture(Identifier p_name, int p_id, int p_width, int p_height) : base(p_name, p_id)
 		{
 			Debug.LogDebug($"Created Texture '{p_name}' ({p_id})");
 			this.width = (double)p_width;
 			this.height = (double)p_height;
+			this.half_width = this.width / 2f;
+			this.half_height = this.height / 2f;
 		}
 
 		internal void Use(TextureUnit p_unit = TextureUnit.Texture0)

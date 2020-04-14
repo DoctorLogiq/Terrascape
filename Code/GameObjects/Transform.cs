@@ -58,6 +58,11 @@ namespace Terrascape.GameObjects
 			Scale(p_all, p_all, p_all);
 		}
 
+		public void SetTranslation(Vector3 p_translation)
+		{
+			SetTranslation(p_translation.X, p_translation.Y, p_translation.Z);
+		}
+
 		public void SetTranslation(float p_x, float p_y, float p_z)
 		{
 			this._position.X = p_x;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Console = Colorful.Console;
 
 #nullable enable
@@ -147,8 +149,53 @@ namespace Terrascape.Debugging
 		
 		// ReSharper restore UnusedMember.Global
 		#endregion
+		
+		public static void Assert(Expression<Func<bool>> p_predicate)
+		{
+			if (!enable_assertions) return;
+			
+			bool pass = p_predicate.Compile().Invoke();
+			if (!pass)
+			{
+				string expression_as_string = p_predicate.Body.ToString();
+				throw new ApplicationException($"Assertion failed: [{expression_as_string}]"); // TODO(LOGIX): Custom exception class
+			}
+		}
 
-		// TODO(LOGIX): Implement assertions
+		// TODO(LOGIX): if (!enable_assertions) return (?)
+		public static bool SafeAssert(Expression<Func<bool>> p_predicate, AssertionLoggingMode p_logging_mode = AssertionLoggingMode.Error)
+		{
+			bool pass = p_predicate.Compile().Invoke();
+			string expression_as_string = p_predicate.Body.ToString();
+			if (pass)
+				LogDebug($"Assertion passed: [{expression_as_string}]");
+			else
+			{
+				switch (p_logging_mode)
+				{
+					case AssertionLoggingMode.Silent: return false;
+					case AssertionLoggingMode.Warning:
+						LogWarning($"Assertion failed: [{expression_as_string}]");
+						break;
+					case AssertionLoggingMode.Error:
+						LogError($"Assertion failed: [{expression_as_string}]");
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(p_logging_mode), p_logging_mode, null);
+				}
+			}
+
+			return pass;
+		}
+
+		public static void DoIfAssertionPasses(Expression<Func<bool>> p_predicate, Action p_task)
+		{
+			bool passed = SafeAssert(p_predicate, AssertionLoggingMode.Silent);
+			if (passed)
+			{
+				p_task.Invoke();
+			}
+		}
 
 		// TODO(LOGIX): Implement profiling
 	}
@@ -171,6 +218,13 @@ namespace Terrascape.Debugging
 		Error,
 		Critical,
 		None
+	}
+
+	public enum AssertionLoggingMode
+	{
+		Silent,
+		Warning,
+		Error
 	}
 
 	internal enum DebuggingLevel : uint
