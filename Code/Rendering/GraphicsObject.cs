@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Terrascape.Debugging;
 using Terrascape.Helpers;
 using Terrascape.Registry;
+using static Terrascape.Debugging.Indentation;
 
 #nullable enable
 
@@ -27,16 +28,16 @@ namespace Terrascape.Rendering
 
 		internal static void Cleanup()
 		{
-			Debug.LogDebugProcessStart("Cleaning up OpenGL objects", DebuggingLevel.Verbose);
+			Debug.LogDebug("Cleaning up OpenGL objects", DebuggingLevel.Verbose, p_post: Indent);
 			foreach (GraphicsObject obj in registry)
 			{
 				Debug.LogDebug($"{SpecialCharacters.Bullet} {obj.GetType().Name} '{obj.name}' {($"({obj.ID})")}",
-					DebuggingLevel.Verbose, p_after_indentation: IndentationStyle.Indent);
+					DebuggingLevel.Verbose, p_post: Indent);
 				
 				obj.Delete();
 				Debug.Unindent(DebuggingLevel.Verbose);
 			}
-			Debug.LogDebugProcessEnd(true, DebuggingLevel.Verbose);
+			Debug.LogDebug("OpenGL object cleanup complete", DebuggingLevel.Verbose, Unindent);
 		}
 	}
 }

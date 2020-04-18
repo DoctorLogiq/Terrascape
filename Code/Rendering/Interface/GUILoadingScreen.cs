@@ -1,4 +1,5 @@
-﻿using Terrascape.Registry;
+﻿using Terrascape.Debugging;
+using Terrascape.Registry;
 
 #nullable enable
 
@@ -6,31 +7,27 @@ namespace Terrascape.Rendering.Interface
 {
 	internal sealed class GUILoadingScreen : GUI
 	{
+		private readonly RGBEffect rgb = new RGBEffect();
+		
 		public GUILoadingScreen() : base("loading_screen_interface")
 		{
 		}
 		
 		protected override void Construct()
 		{
-			Add(new UiModel("loading_model", RegistryKeys.Textures.Loading, UiModel.Rectangle, -50f, -50f, UiModelAnchorMode.BottomRight));
+			Debug.Assert(() => Terrascape.GUIAtlas != null, true);
+			Add(new UiModel("loading_model", Terrascape.GUIAtlas, "gui_loading", -50f, -50f, UiModelAnchorMode.BottomRight));
 		}
-
-		private byte alpha = 255;
-		private bool decrease = true;
 
 		protected override void PreRender(in double p_delta)
 		{
-			Terrascape.SetUiShaderChannelMix(p_alpha: this.alpha);
-			
-			if (this.decrease && this.alpha == 50)
-				this.decrease = false;
-			else if (!this.decrease && this.alpha == 255)
-				this.decrease = true;
+			//this.rgb.Update(p_delta);
+			//Terrascape.SetUiShaderChannelMix(this.rgb.Red, this.rgb.Green, this.rgb.Blue);
+		}
 
-			if (this.decrease)
-				this.alpha--;
-			else
-				this.alpha++;
+		protected override void PostRender(in double p_delta)
+		{
+			Terrascape.SetUiShaderChannelMix();
 		}
 	}
 }

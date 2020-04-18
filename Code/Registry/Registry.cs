@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Terrascape.Debugging;
+using Terrascape.Exceptions;
 
 #nullable enable
 
@@ -70,7 +71,7 @@ namespace Terrascape.Registry
 			if (IsRegistered(p_identifier))
 				return this.registry[p_identifier];
 			
-			throw new ApplicationException($"Cannot find {this.type_name} '{p_identifier}' in the {this.type_name} registry"); // TODO(LOGIX): Custom exception type
+			throw new TerrascapeException($"Cannot find {this.type_name} '{p_identifier}' in the {this.type_name} registry"); // TODO(LOGIX): Custom exception type
 		}
 
 		protected T? ActualGetOrNull(in Identifier p_identifier)

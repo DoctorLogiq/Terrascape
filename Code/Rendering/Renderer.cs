@@ -2,6 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using OpenTK.Graphics.OpenGL4;
 using Terrascape.Debugging;
+using static Terrascape.Debugging.Indentation;
+using static Terrascape.Debugging.DebuggingLevel;
 
 #nullable enable
 
@@ -17,8 +19,8 @@ namespace Terrascape.Rendering
         internal static int CreateVAO(bool p_bind, bool p_is_test = false)
         {
             int vao = GL.GenVertexArray();
-            if (!p_is_test) Debug.LogDebug($"Created VAO ({vao})", DebuggingLevel.Verbose);
-            else Debug.LogTest($"Created test VAO ({vao})", DebuggingLevel.Verbose);
+            if (!p_is_test) Debug.LogDebug($"Created VAO ({vao})", Verbose);
+            else Debug.LogTest($"Created test VAO ({vao})", Verbose);
             VAOs.Add((vao, p_is_test));
 
             if (p_bind) GL.BindVertexArray(vao);
@@ -28,8 +30,8 @@ namespace Terrascape.Rendering
         internal static void CreateVAO(bool p_bind, out int p_vao, bool p_is_test = false)
         {
             p_vao = GL.GenVertexArray();
-            if (!p_is_test) Debug.LogDebug($"Created VAO ({p_vao})", DebuggingLevel.Verbose);
-            else Debug.LogTest($"Created test VAO ({p_vao})", DebuggingLevel.Verbose);
+            if (!p_is_test) Debug.LogDebug($"Created VAO ({p_vao})", Verbose);
+            else Debug.LogTest($"Created test VAO ({p_vao})", Verbose);
             VAOs.Add((p_vao, p_is_test));
 
             if (p_bind) GL.BindVertexArray(p_vao);
@@ -38,8 +40,8 @@ namespace Terrascape.Rendering
         internal static int CreateVBO(bool p_bind, bool p_is_test = false)
         {
             int vbo = GL.GenBuffer();
-            if (!p_is_test) Debug.LogDebug($"Created VBO ({vbo})", DebuggingLevel.Verbose);
-            else Debug.LogTest($"Created test VBO ({vbo})", DebuggingLevel.Verbose);
+            if (!p_is_test) Debug.LogDebug($"Created VBO ({vbo})", Verbose);
+            else Debug.LogTest($"Created test VBO ({vbo})", Verbose);
             VBOs.Add((vbo, p_is_test));
 
             if (p_bind) GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
@@ -49,8 +51,8 @@ namespace Terrascape.Rendering
         internal static void CreateVBO(bool p_bind, out int p_vbo, bool p_is_test = false)
         {
             p_vbo = GL.GenBuffer();
-            if (!p_is_test) Debug.LogDebug($"Created VBO ({p_vbo})", DebuggingLevel.Verbose);
-            else Debug.LogTest($"Created test VBO ({p_vbo})", DebuggingLevel.Verbose);
+            if (!p_is_test) Debug.LogDebug($"Created VBO ({p_vbo})", Verbose);
+            else Debug.LogTest($"Created test VBO ({p_vbo})", Verbose);
             VBOs.Add((p_vbo, p_is_test));
 
             if (p_bind) GL.BindBuffer(BufferTarget.ArrayBuffer, p_vbo);
@@ -59,8 +61,8 @@ namespace Terrascape.Rendering
         internal static int CreateEBO(bool p_bind, bool p_is_test = false)
         {
             int ebo = GL.GenBuffer();
-            if (!p_is_test) Debug.LogDebug($"Created EBO ({ebo})", DebuggingLevel.Verbose);
-            else Debug.LogTest($"Created test EBO ({ebo})", DebuggingLevel.Verbose);
+            if (!p_is_test) Debug.LogDebug($"Created EBO ({ebo})", Verbose);
+            else Debug.LogTest($"Created test EBO ({ebo})", Verbose);
             EBOs.Add((ebo, p_is_test));
 
             if (p_bind) GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
@@ -70,8 +72,8 @@ namespace Terrascape.Rendering
         internal static void CreateEBO(bool p_bind, out int p_ebo, bool p_is_test = false)
         {
             p_ebo = GL.GenBuffer();
-            if (!p_is_test) Debug.LogDebug($"Created EBO ({p_ebo})", DebuggingLevel.Verbose);
-            else Debug.LogTest($"Created test EBO ({p_ebo})", DebuggingLevel.Verbose);
+            if (!p_is_test) Debug.LogDebug($"Created EBO ({p_ebo})", Verbose);
+            else Debug.LogTest($"Created test EBO ({p_ebo})", Verbose);
             EBOs.Add((p_ebo, p_is_test));
 
             if (p_bind) GL.BindBuffer(BufferTarget.ElementArrayBuffer, p_ebo);
@@ -83,8 +85,8 @@ namespace Terrascape.Rendering
             {
                 if (vbo.Item1 != p_vbo) continue;
 
-                if (!vbo.Item2) Debug.LogDebug($"Deleting VBO ({vbo.Item1})", DebuggingLevel.Verbose);
-                else Debug.LogTest($"Deleting test VBO ({vbo.Item1})", DebuggingLevel.Verbose);
+                if (!vbo.Item2) Debug.LogDebug($"Deleting VBO ({vbo.Item1})", Verbose);
+                else Debug.LogTest($"Deleting test VBO ({vbo.Item1})", Verbose);
 
                 GL.DeleteBuffer(vbo.Item1);
                 VBOs.Remove(vbo);
@@ -98,8 +100,8 @@ namespace Terrascape.Rendering
             {
                 if (vao.Item1 != p_vao) continue;
 
-                if (!vao.Item2) Debug.LogDebug($"Deleting VAO ({vao.Item1})", DebuggingLevel.Verbose);
-                else Debug.LogTest($"Deleting test VAO ({vao.Item1})", DebuggingLevel.Verbose);
+                if (!vao.Item2) Debug.LogDebug($"Deleting VAO ({vao.Item1})", Verbose);
+                else Debug.LogTest($"Deleting test VAO ({vao.Item1})", Verbose);
 
                 GL.DeleteVertexArray(vao.Item1);
                 VAOs.Remove(vao);
@@ -113,8 +115,8 @@ namespace Terrascape.Rendering
             {
                 if (ebo.Item1 != p_ebo) continue;
 
-                if (!ebo.Item2) Debug.LogDebug($"Deleting EBO ({ebo.Item1})", DebuggingLevel.Verbose);
-                else Debug.LogTest($"Deleting test EBO ({ebo.Item1})", DebuggingLevel.Verbose);
+                if (!ebo.Item2) Debug.LogDebug($"Deleting EBO ({ebo.Item1})", Verbose);
+                else Debug.LogTest($"Deleting test EBO ({ebo.Item1})", Verbose);
 
                 GL.DeleteBuffer(ebo.Item1);
                 EBOs.Remove(ebo);
@@ -126,29 +128,29 @@ namespace Terrascape.Rendering
         {
             Debug.DoIfAssertionPasses(() => VBOs.Count > 0 || EBOs.Count > 0 || VAOs.Count > 0, () =>
             {
-                Debug.LogDebugProcessStart("Cleaning up VAOs, VBOs and EBOs", DebuggingLevel.Verbose);
+                Debug.LogDebug("Cleaning up VAOs, VBOs and EBOs", Verbose, p_post: Indent);
                 foreach ((int id, bool is_test) in VBOs)
                 {
-                    if (!is_test) Debug.LogDebug($"Deleting VBO ({id})", DebuggingLevel.Verbose);
-                    else Debug.LogTest($"Deleting test VBO ({id})", DebuggingLevel.Verbose);
+                    if (!is_test) Debug.LogDebug($"Deleting VBO ({id})", Verbose);
+                    else Debug.LogTest($"Deleting test VBO ({id})", Verbose);
 
                     GL.DeleteBuffer(id);
                 }
                 foreach ((int id, bool is_test) in EBOs)
                 {
-                    if (!is_test) Debug.LogDebug($"Deleting EBO ({id})", DebuggingLevel.Verbose);
-                    else Debug.LogTest($"Deleting test EBO ({id})", DebuggingLevel.Verbose);
+                    if (!is_test) Debug.LogDebug($"Deleting EBO ({id})", Verbose);
+                    else Debug.LogTest($"Deleting test EBO ({id})", Verbose);
 
                     GL.DeleteBuffer(id);
                 }
                 foreach ((int id, bool is_test) in VAOs)
                 {
-                    if (!is_test) Debug.LogDebug($"Deleting VAO ({id})", DebuggingLevel.Verbose);
-                    else Debug.LogTest($"Deleting test VAO ({id})", DebuggingLevel.Verbose);
+                    if (!is_test) Debug.LogDebug($"Deleting VAO ({id})", Verbose);
+                    else Debug.LogTest($"Deleting test VAO ({id})", Verbose);
 
                     GL.DeleteVertexArray(id);
                 }
-                Debug.LogDebugProcessEnd(true, DebuggingLevel.Verbose);
+                Debug.LogDebug("Arrays and buffers cleaned up", Verbose, Unindent);
             });
         }
 	}

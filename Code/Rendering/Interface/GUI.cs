@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using Terrascape.Debugging;
 using Terrascape.Registry;
+using static Terrascape.Debugging.Indentation;
+using static Terrascape.Debugging.DebuggingLevel;
 
 #nullable enable
 
 namespace Terrascape.Rendering.Interface
 {
-	// TODO(LOGIX): Implement disposal, clean up model vao, vbo and ebos
+	// TODO(LOGIX): Possibly make a function to alter offset (non-internally)
 	public abstract class GUI : IRenderable, IIdentifiable, IDisposable
 	{
 		private readonly List<UiModel> models = new List<UiModel>();
@@ -16,9 +18,9 @@ namespace Terrascape.Rendering.Interface
 		protected GUI(Identifier p_name)
 		{
 			this.name = p_name;
-			Debug.LogDebug($"Creating interface '{p_name}'", DebuggingLevel.Verbose, p_after_indentation: IndentationStyle.Indent);
+			Debug.LogDebug($"Creating interface '{p_name}'", Verbose, p_post: Indent);
 			Construct();
-			Debug.LogDebug("Interface created", DebuggingLevel.Verbose, IndentationStyle.Unindent);
+			Debug.LogDebug("Interface created", Verbose, Unindent);
 		}
 
 		protected abstract void Construct();
@@ -52,16 +54,16 @@ namespace Terrascape.Rendering.Interface
 
 		public void Dispose()
 		{
-			Debug.LogDebug($"Cleaning up model data for the '{this.name}' GUI", DebuggingLevel.Verbose, p_after_indentation: IndentationStyle.Indent);
+			Debug.LogDebug($"Cleaning up model data for the '{this.name}' GUI", Verbose, p_post: Indent);
 			foreach (UiModel model in this.models)
 			{
-				Debug.LogDebug($"Cleaning up model data for model '{model.name}'", DebuggingLevel.Verbose, p_after_indentation: IndentationStyle.Indent);
+				Debug.LogDebug($"Cleaning up model data for model '{model.name}'", Verbose, p_post: Indent);
 				Renderer.DeleteEBO(model.ebo);
 				Renderer.DeleteVBO(model.vbo);
 				Renderer.DeleteVAO(model.vao);
-				Debug.LogDebug($"Model data cleaned up for model '{model.name}'", DebuggingLevel.Verbose, IndentationStyle.Unindent);
+				Debug.LogDebug($"Model data cleaned up for model '{model.name}'", Verbose, Unindent);
 			}
-			Debug.LogDebug("Cleanup complete", DebuggingLevel.Verbose, IndentationStyle.Unindent);
+			Debug.LogDebug("Cleanup complete", Verbose, Unindent);
 		}
 	}
 }

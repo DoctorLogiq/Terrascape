@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics;
 using Terrascape.Debugging;
+using Terrascape.Exceptions;
 using Terrascape.Helpers;
 using Terrascape.Windowing;
+using static Terrascape.Debugging.Indentation;
+using static Terrascape.Debugging.DebuggingLevel;
 
 #nullable enable
 
@@ -69,7 +72,7 @@ namespace Terrascape
 			{
 				if (Debug.enable_debugging)
 				{
-					Debug.debugging_level = DebuggingLevel.Verbose;
+					Debug.debugging_level = Verbose;
 					early_debug_messages.Add(("Debugging level set to verbose", false));
 				}
 				else
@@ -121,7 +124,7 @@ namespace Terrascape
 			
 			/* Now print any messages that were supposed to be printed during argument parsing. This is held
 			 until now because we first need to know whether or not debugging mode is going to be enabled. */
-			Debug.LogDebugProcessStart("Parsing arguments");
+			Debug.LogDebug("Parsing arguments", p_post: Indent);
 #pragma warning disable CS8619
 			foreach ((string message, bool is_warning) in early_debug_messages)
 			{
@@ -129,7 +132,7 @@ namespace Terrascape
 				else Debug.LogDebug($"{SpecialCharacters.Bullet} {message}");
 			}
 #pragma warning restore CS8619
-			Debug.LogDebugProcessEnd(true);
+			Debug.LogDebug("Arguments parsed", p_pre: Unindent);
 			early_debug_messages.Clear();
 
 			/* Run the game! */
@@ -190,8 +193,8 @@ namespace Terrascape
 					{
 						instance.phase = "RESIZE";
 						instance.Resize();
-						Width = (double)instance.window.Width;
-						Height = (double)instance.window.Height;
+						Width = instance.window.Width;
+						Height = instance.window.Height;
 						HalfWidth = Width / 2D;
 						HalfHeight = Height / 2D;
 						instance.phase = "RENDER-WHILE-RESIZING";
@@ -282,6 +285,12 @@ namespace Terrascape
 		            {
 			            Debug.LogCritical($"\"{exception.Message}\"");
 		            }
+	            }
+
+	            if (exception is TerrascapeException tex && tex.additional_details != null && tex.additional_details.Length > 0)
+	            {
+		            foreach (string additional in tex.additional_details)
+						Debug.LogCritical(additional);
 	            }
 
 	            if (!string.IsNullOrEmpty(exception.StackTrace))

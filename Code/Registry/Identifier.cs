@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-using Terrascape.Debugging;
+using Terrascape.Exceptions;
 
 #nullable enable
 
@@ -15,7 +15,7 @@ namespace Terrascape.Registry
 		public Identifier(string p_name)
 		{
 			if (!identifier_regex.IsMatch(p_name))
-				throw new ApplicationException($"Invalid identifier '{p_name}'"); /*TODO(LOGIX): InvalidIdentifierException*/
+				throw new InvalidIdentifierException(p_name);
 			
 			this.name = p_name;
 		}

@@ -2,10 +2,12 @@
 using System.Diagnostics.CodeAnalysis;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Input;
 using Terrascape.Debugging;
 using Terrascape.Registry;
 using Terrascape.Rendering;
 using Terrascape.Rendering.Interface;
+using static Terrascape.Debugging.Indentation;
 
 #nullable enable
 
@@ -13,9 +15,15 @@ namespace Terrascape
 {
 	internal class Terrascape : Program
 	{
+		private static Shader? ui_shader;
+		internal static TextureAtlas? GUIAtlas { get; private set; }
+		internal static TextureAtlas? BlocksAtlas { get; private set; }
+
+		//internal static bool GUIDebug { get; private set; } = false;
+			
 		private Matrix4 view_matrix, projection_matrix;
 		private GUI? current_gui = null;
-		
+
 		protected override void Initialize()
 		{
 			GL.ClearColor(.1f, .1f, .1f, 0f);
@@ -39,7 +47,7 @@ namespace Terrascape
 			this.projection_matrix = Matrix4.CreateOrthographic(this.window.Width, this.window.Height, .01f, 100f); // TODO(LOGIX): Update values
 
 			PreLoad();
-			
+			SetUiShaderChannelMix(); // NOTE(LOGIX): This is necessary to set the default channel mix to full white + alpha
 			ChangeGUI<GUILoadingScreen>();
 		}
 
@@ -83,16 +91,20 @@ namespace Terrascape
 
 		private static void PreLoad()
 		{
-			Shader.Load(RegistryKeys.Shaders.InterfaceShader, "ui_shader");
-			SetUiShaderChannelMix(); // NOTE(LOGIX): This is necessary to set the default channel mix to full white + alpha
-            
-			Texture.Load(RegistryKeys.Textures.FullMask, "GUI/full_mask");
-			Texture.Load(RegistryKeys.Textures.Loading, "GUI/loading");
+			Debug.LogInfo("Loading shaders", p_post: Indent);
+			{
+				Shader.Load("ui_shader", "ui_shader");
+				ui_shader = ShaderRegistry.Get("ui_shader");
+			}
+			Debug.LogInfo("Shaders loaded", p_pre: Unindent);
+			
+			GUIAtlas    = TextureAtlas.Build("gui_texture_atlas", "GUI", "gui");
+			BlocksAtlas = TextureAtlas.Build("blocks_texture_atlas", "Blocks", "block");
 		}
 		
 		protected override void Load()
 		{
-			 
+ 
 		}
 
 		internal void ChangeGUI<T>() where T : GUI, new()
@@ -101,9 +113,16 @@ namespace Terrascape
 			this.current_gui = new T();
 		}
 
+		private KeyboardState last_keyboard_state = Keyboard.GetState();
+
 		protected override void Update(in double p_delta)
 		{
+			KeyboardState current_keyboard_state = Keyboard.GetState();
 			
+			if (current_keyboard_state.IsKeyUp(Key.Escape) && this.last_keyboard_state.IsKeyDown(Key.Escape))
+				this.window.Close(); // TODO(LOGIX): Request shutdown
+			
+			this.last_keyboard_state = current_keyboard_state;
 		}
 
 		protected override void Render(in double p_delta)
@@ -112,7 +131,10 @@ namespace Terrascape
 			
 			GL.Disable(EnableCap.DepthTest);
 			{
-				ShaderRegistry.Get(RegistryKeys.Shaders.InterfaceShader).Use();
+				Debug.Assert(() => ui_shader != null, true, "The 'ui_shader' was somehow null during Render()");
+
+				ui_shader.Use();
+				GUIAtlas.Use();
 				Shader.CurrentShader?.SetMatrix4("inView", this.view_matrix);
 				Shader.CurrentShader?.SetMatrix4("inProjection", this.projection_matrix);
 				this.current_gui?.Render(p_delta);
@@ -132,13 +154,13 @@ namespace Terrascape
 
 		protected override void RequestShutdown(ref bool p_cancel)
 		{
-			Debug.LogDebug("Shutdown request");
+			Debug.LogDebug("Shutdown request received; accepting");
 		}
 
 		protected override void Shutdown()
 		{
 			Debug.ResetIndentation();
-			Debug.LogDebug("Shutting down", p_after_indentation: IndentationStyle.Indent);
+			Debug.LogDebug("Shutting down", p_post: Indent);
 			
 			this.current_gui?.Dispose();
 			
@@ -156,13 +178,13 @@ namespace Terrascape
 			
 			Renderer.Cleanup();
 			GraphicsObject.Cleanup();
-			Debug.LogDebug("Shutdown complete", p_before_indentation: IndentationStyle.Unindent);
+			Debug.LogDebug("Shutdown complete", p_pre: Unindent);
 		}
 
 		[SuppressMessage("ReSharper", "RedundantCast")]
 		internal static void SetUiShaderChannelMix(byte p_red = 255, byte p_green = 255, byte p_blue = 255, byte p_alpha = 255)
 		{
-			Shader shader = ShaderRegistry.Get(RegistryKeys.Shaders.InterfaceShader);
+			Shader shader = ShaderRegistry.Get("ui_shader");
 			shader.Use();
 
 			shader.SetFloat("inR", (float) p_red   / 255F);

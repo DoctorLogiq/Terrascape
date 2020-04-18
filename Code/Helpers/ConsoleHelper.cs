@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -70,6 +71,8 @@ namespace Terrascape.Helpers
 			
 			Console.WriteLine();
 			Debug.LogProgram("--------------------[  HELLO!  ]--------------------");
+			
+			Console.WriteAscii("Welcome to Terrascape!", Color.Crimson);
 		}
 
 		internal static void Terminate()

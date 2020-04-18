@@ -5,6 +5,7 @@ using System.Linq;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using Terrascape.Debugging;
+using Terrascape.Exceptions;
 using Terrascape.Helpers;
 using Terrascape.Registry;
 
@@ -58,7 +59,7 @@ namespace Terrascape.Rendering
 			Use();
 			
 			if (!this.uniform_locations.ContainsKey(p_name))
-				throw new ApplicationException($"Could not find int shader uniform '{p_name}' in the '{this.name}' shader");
+				throw new TerrascapeException($"Could not find int shader uniform '{p_name}' in the '{this.name}' shader");
 			
 			GL.Uniform1(this.uniform_locations[p_name], p_value);
 		}
@@ -68,7 +69,7 @@ namespace Terrascape.Rendering
 			Use();
 			
 			if (!this.uniform_locations.ContainsKey(p_name))
-				throw new ApplicationException($"Could not find float shader uniform '{p_name}' in the '{this.name}' shader");
+				throw new TerrascapeException($"Could not find float shader uniform '{p_name}' in the '{this.name}' shader");
 			
 			GL.Uniform1(this.uniform_locations[p_name], p_value);
 		}
@@ -78,7 +79,7 @@ namespace Terrascape.Rendering
 			Use();
 			
 			if (!this.uniform_locations.ContainsKey(p_name))
-				throw new ApplicationException($"Could not find Matrix4 shader uniform '{p_name}' in the '{this.name}' shader");
+				throw new TerrascapeException($"Could not find Matrix4 shader uniform '{p_name}' in the '{this.name}' shader");
 			
 			GL.UniformMatrix4(this.uniform_locations[p_name], true, ref p_value);
 		}
@@ -88,7 +89,7 @@ namespace Terrascape.Rendering
 			Use();
 			
 			if (!this.uniform_locations.ContainsKey(p_name))
-				throw new ApplicationException($"Could not find Vector2 shader uniform '{p_name}' in the '{this.name}' shader");
+				throw new TerrascapeException($"Could not find Vector2 shader uniform '{p_name}' in the '{this.name}' shader");
 			
 			GL.Uniform2(this.uniform_locations[p_name], p_value);
 		}
@@ -98,7 +99,7 @@ namespace Terrascape.Rendering
 			Use();
 			
 			if (!this.uniform_locations.ContainsKey(p_name))
-				throw new ApplicationException($"Could not find Vector3 shader uniform '{p_name}' in the '{this.name}' shader");
+				throw new TerrascapeException($"Could not find Vector3 shader uniform '{p_name}' in the '{this.name}' shader");
 			
 			GL.Uniform3(this.uniform_locations[p_name], p_value);
 		}
@@ -121,11 +122,11 @@ namespace Terrascape.Rendering
 		{
             string vertex_source = AssetHelper.ReadTextAsset($"/Shaders/{(p_vertex_filename.Contains(".") ? p_vertex_filename : $"{p_vertex_filename}.vert")}");
             if (string.IsNullOrEmpty(vertex_source))
-                throw new ApplicationException("The vertex shader source code was null or empty");
+                throw new TerrascapeException("The vertex shader source code was null or empty");
 
             string fragment_source = AssetHelper.ReadTextAsset($"Shaders/{(p_fragment_filename.Contains(".") ? p_fragment_filename : $"{p_fragment_filename}.frag")}");
             if (string.IsNullOrEmpty(fragment_source))
-                throw new ApplicationException("The vertex vertex source code was null or empty");
+                throw new TerrascapeException("The vertex vertex source code was null or empty");
             
             int vertex_shader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vertex_shader, vertex_source);
@@ -135,7 +136,7 @@ namespace Terrascape.Rendering
             {
 	            GL.DeleteShader(vertex_shader);
 
-                throw new ApplicationException("vertex shader compilation failed; " + vertex_info);
+                throw new TerrascapeException("vertex shader compilation failed; " + vertex_info);
             }
 
             int fragment_shader = GL.CreateShader(ShaderType.FragmentShader);
@@ -147,7 +148,7 @@ namespace Terrascape.Rendering
                 GL.DeleteShader(vertex_shader);
                 GL.DeleteShader(fragment_shader);
 
-                throw new ApplicationException("fragment shader compilation failed; " + fragment_info);
+                throw new TerrascapeException("fragment shader compilation failed; " + fragment_info);
             }
             
             // ReSharper disable once InconsistentNaming
@@ -166,7 +167,7 @@ namespace Terrascape.Rendering
 
                 GL.DeleteShader(program_ID);
 
-                throw new ApplicationException("Shader program linking failed; " + program_info);
+                throw new TerrascapeException("Shader program linking failed; " + program_info);
             }
 
             GL.DetachShader(program_ID, vertex_shader);
